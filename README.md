@@ -3,7 +3,7 @@ PcapKnock
 PcapKnock listens for specially-crafted packets and either runs a command or
 spawns a reverse shell based on the contents of the packets.  It is meant for
 use as a PoC; there is no encryption or authentication.  It can either be built
-as a standalone binary or an injectable binary.
+as a standalone binary or an injectable library.
 
 For legal use only.
 
