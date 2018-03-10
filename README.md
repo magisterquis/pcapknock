@@ -67,10 +67,10 @@ Setting       | Default    | Description
 `SHELLNAME`   | `kexecd`   | Shell process name (i.e. `argv[0]`)
 `CBMARKER`    | `CALLBACK` | Marker for reverse shell addresses
 `CMDMARKER`   | `COMMAND`  | Marker for commands
- It is unlikely the below will need to be changed | |
+| | |It is unlikely the below will need to be changed |
 `MAXKNOCK`    | `4096`     | Maximum command/address length
 `CLMAXFD`     | `10240`    | Maximum filedescriptor number to close after fork
 `CONSTRUCTOR` | _unset_    | If defined, runs as a constructor (for injection)
-`ERROUT       | _unset_    | If defined, outputs error messages to stdout
+`ERROUT`      | _unset_    | If defined, outputs error messages to stdout
 
 Only the first four will likely need to be changed in most cases.
