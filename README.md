@@ -60,6 +60,7 @@ configuration.  For convience, the `DEVICE` environment variable may be set to
 change the device on which traffic is monitored.
 
 The configurable settings are:
+
 Setting     | Default    | Description
 ------------|------------|---------------------------------
 DEVICE      | `any`      | Device on which to sniff packets
