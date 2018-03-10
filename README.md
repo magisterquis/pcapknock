@@ -9,7 +9,7 @@ For legal use only.
 
 Usage
 -----
-In most cases, the [`build.sh`](./build.sh) script is sufficient to build the
+In most cases, the [`build.sh`](./build.sh) script is sufficient to build:
 ```bash
 $ ./build.sh
 C Flags:      "-O2 -Wall --pedantic"
