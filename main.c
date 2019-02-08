@@ -10,6 +10,7 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 #include <err.h>
+#include <signal.h>
 #endif /* #ifdef DOUBLEFORK */
 
 #include <pthread.h>
