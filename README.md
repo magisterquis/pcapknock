@@ -57,13 +57,14 @@ Configuration takes place in the form of C defines.  Defaults are set in
 `-DOPTION=value` to the compiler.  The included build script passes whatever
 is in the `DEFINES` environment variable to the compiler to enable compile-time
 configuration.  For convience, the `DEVICE` environment variable may be set to
-change the device on which traffic is monitored.
+change the device on which traffic is monitored.  If DEVICE is unset, all
+interfaces will be used.
 
 The configurable settings are:
 
 Setting       | Default    | Description
 --------------|------------|---------------------------------
-`DEVICE`      | `any`      | Device on which to sniff packets
+`DEVICE`      | `""`       | Device on which to sniff packets
 `SHELLNAME`   | `kexecd`   | Shell process name (i.e. `argv[0]`)
 `CBMARKER`    | `CALLBACK` | Marker for reverse shell addresses
 `CMDMARKER`   | `COMMAND`  | Marker for commands

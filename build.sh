@@ -8,7 +8,7 @@
 
 set -e
 
-CFLAGS="-O2 -Wall --pedantic"
+CFLAGS="-O2 -Wall --pedantic --std=c99"
 LFLAGS="-lpcap -lpthread"
 LIBNAME="pcapknock.so"
 BINNAME="pcapknock"

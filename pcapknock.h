@@ -13,7 +13,7 @@
 
 /* DEVICE is the network device on which to capture */
 #ifndef DEVICE
-#define DEVICE "any"
+#define DEVICE ""
 #endif /* #ifndef DEVICE */
 
 /* CBMARKER must surround the address used for a callback */

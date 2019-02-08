@@ -26,6 +26,7 @@
 #else 
 #define err(n, ...) exit(n)
 #define warn(...) ((void)0)
+#define warnx(...) ((void)0)
 #endif /* #ifdef ERROUT */
 
 #include "pcapknock.h"
@@ -35,15 +36,55 @@ void handle(u_char *buf, const struct pcap_pkthdr *hdr, const u_char *pkt);
 int find_string(char *marker, u_char *buf, const u_char *pkt, bpf_u_int32 len);
 void double_fork(u_char *s, int action);
 void callback(u_char *addr);
+int capture_on_device(char *dev);
 
 /* Constants for double_fork */
 #define DO_CALLBACK 1
 #define DO_COMMAND  2
 
+/* Make sure we have a device */
+#ifndef DEVICE
+#error DEVICE must be set to the capture interface
+#endif /* #ifndef DEVICE */
+
 /* pcapknock starts do_pcap in a thread */
 int
 pcapknock(void)
 {
+        pcap_if_t *alldevsp, *cur;
+        char errbuf[PCAP_ERRBUF_SIZE+1];
+        int worky; /* True if at least one device worked for capture */
+
+        /* If we have a single named device, capture on it */
+        if ('\0' != DEVICE[0])
+                return capture_on_device(DEVICE);
+
+        /* If we don't have a particular device, get a list of capturable
+         * devices. */
+        bzero(errbuf, sizeof(errbuf));
+        if (0 != pcap_findalldevs(&alldevsp, errbuf)) {
+                warnx("findalldevs: %s", errbuf);
+                return 1;
+        }
+
+        /* Capture on the devices */
+        worky = 0;
+        for (cur = alldevsp; NULL != cur; cur = cur->next) {
+                /* Ignore loopback */
+                if (0 == strncmp(cur->name, "lo", 2))
+                        continue;
+                /* Start capturing on the device */
+                worky &= capture_on_device(cur->name);
+        }
+
+        pcap_freealldevs(alldevsp);
+
+        return worky;
+}
+
+/* capture_on_device tries to start a capture on the device named dev. */
+int
+capture_on_device(char *dev) {
         int ret;
         pthread_t tid;
         pthread_attr_t attr;
@@ -63,8 +104,8 @@ pcapknock(void)
 
         /* Open capture device */
         memset(errbuf, 0, sizeof(errbuf));
-        if (NULL == (p = pcap_open_live(DEVICE, 65535, 1, 10, errbuf))) {
-                warn("pcap_open_live: %s", errbuf);
+        if (NULL == (p = pcap_open_live(dev, 65535, 1, 10, errbuf))) {
+                warnx("pcap_open_live: %s", errbuf);
                 return 3;
         }
 
@@ -74,6 +115,8 @@ pcapknock(void)
                 return ret;
         }
 
+        fprintf(stderr, "Capturing on %s\n", dev); /* DEBUG */
+
         return 0;
 }
 
@@ -81,10 +124,6 @@ pcapknock(void)
 void *
 do_pcap(void *a)
 {
-/* Make sure we have a device */
-#ifndef DEVICE
-#error DEVICE must be set to the capture interface
-#endif /* #ifndef DEVICE */
 /* Make sure we have a maximum knock length */
 #ifndef MAXKNOCK
 #error MAXKNOCK must be set
