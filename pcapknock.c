@@ -115,8 +115,6 @@ capture_on_device(char *dev) {
                 return ret;
         }
 
-        fprintf(stderr, "Capturing on %s\n", dev); /* DEBUG */
-
         return 0;
 }
 

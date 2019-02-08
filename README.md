@@ -57,8 +57,8 @@ Configuration takes place in the form of C defines.  Defaults are set in
 `-DOPTION=value` to the compiler.  The included build script passes whatever
 is in the `DEFINES` environment variable to the compiler to enable compile-time
 configuration.  For convience, the `DEVICE` environment variable may be set to
-change the device on which traffic is monitored.  If `DEVICE` is unset, all
-interfaces will be used.
+change the device on which traffic is monitored.  If `DEVICE` is the empty
+string, all interfaces will be used.
 
 The configurable settings are:
 
@@ -68,10 +68,11 @@ Setting       | Default    | Description
 `SHELLNAME`   | `kexecd`   | Shell process name (i.e. `argv[0]`)
 `CBMARKER`    | `CALLBACK` | Marker for reverse shell addresses
 `CMDMARKER`   | `COMMAND`  | Marker for commands
+`DOUBLEFORK`  | _unset_    | If defined, disassociates from the terminal when running as a program
 | | |It is unlikely the below will need to be changed |
 `MAXKNOCK`    | `4096`     | Maximum command/address length
 `CLMAXFD`     | `10240`    | Maximum filedescriptor number to close after fork
 `CONSTRUCTOR` | _unset_    | If defined, runs as a constructor (for injection)
-`ERROUT`      | _unset_    | If defined, outputs error messages to stdout
+`ERROUT`      | _unset_    | If defined, outputs error messages
 
 Only the first four will likely need to be changed in most cases.
