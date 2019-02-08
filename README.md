@@ -57,7 +57,7 @@ Configuration takes place in the form of C defines.  Defaults are set in
 `-DOPTION=value` to the compiler.  The included build script passes whatever
 is in the `DEFINES` environment variable to the compiler to enable compile-time
 configuration.  For convience, the `DEVICE` environment variable may be set to
-change the device on which traffic is monitored.  If DEVICE is unset, all
+change the device on which traffic is monitored.  If `DEVICE` is unset, all
 interfaces will be used.
 
 The configurable settings are:
