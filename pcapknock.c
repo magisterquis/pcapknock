@@ -237,7 +237,7 @@ double_fork(u_char *s, int action)
                         callback(s);
                 case DO_COMMAND:
                         if (-1 == execl("/bin/sh", "sh", "-c", s,
-                                                (char *)(NULL))
+                                                (char *)NULL))
                                 exit(9);
         }
         exit(0);
