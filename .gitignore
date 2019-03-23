@@ -3,3 +3,5 @@ pcapknock
 pcapknock.so
 pcapknock.static
 pcapknock.dynamic
+a.out
+a.out.core
