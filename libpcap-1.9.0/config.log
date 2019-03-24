@@ -647,7 +647,7 @@ configure:5004: $? = 0
 configure:5004: result: yes
 configure:5004: checking for strerror_s
 configure:5004: gcc -std=gnu99 -o conftest -g -O2   conftest.c  >&5
-/tmp/ccK2dywh.o: In function `main':
+/tmp/cc7JJ0TS.o: In function `main':
 /home/stuart/pcapknock/libpcap-1.9.0/conftest.c:61: undefined reference to `strerror_s'
 collect2: error: ld returned 1 exit status
 configure:5004: $? = 1
@@ -719,7 +719,7 @@ configure: failed program was:
 configure:5004: result: no
 configure:5004: checking for strlcpy
 configure:5004: gcc -std=gnu99 -o conftest -g -O2   conftest.c  >&5
-/tmp/ccYgXbWk.o: In function `main':
+/tmp/cc4uQVsK.o: In function `main':
 /home/stuart/pcapknock/libpcap-1.9.0/conftest.c:61: undefined reference to `strlcpy'
 collect2: error: ld returned 1 exit status
 configure:5004: $? = 1
@@ -791,7 +791,7 @@ configure: failed program was:
 configure:5004: result: no
 configure:5004: checking for strlcat
 configure:5004: gcc -std=gnu99 -o conftest -g -O2   conftest.c  >&5
-/tmp/ccezmLyq.o: In function `main':
+/tmp/ccORoLzM.o: In function `main':
 /home/stuart/pcapknock/libpcap-1.9.0/conftest.c:61: undefined reference to `strlcat'
 collect2: error: ld returned 1 exit status
 configure:5004: $? = 1
@@ -896,7 +896,7 @@ configure:5105: $? = 0
 configure:5105: result: yes
 configure:5220: checking for library containing putmsg
 configure:5251: gcc -std=gnu99 -o conftest -g -O2   conftest.c  >&5
-/tmp/ccPtTpcA.o: In function `main':
+/tmp/ccKIigF6.o: In function `main':
 /home/stuart/pcapknock/libpcap-1.9.0/conftest.c:43: warning: warning: putmsg is not implemented and will always fail
 configure:5251: $? = 0
 configure:5268: result: none required
@@ -998,7 +998,7 @@ configure:5736: checking for pthread.h
 configure:5736: result: yes
 configure:5743: checking for pthread_create
 configure:5743: gcc -std=gnu99 -o conftest -g -O2   conftest.c  >&5
-/tmp/ccDDKemU.o: In function `main':
+/tmp/ccMfTL3t.o: In function `main':
 /home/stuart/pcapknock/libpcap-1.9.0/conftest.c:71: undefined reference to `pthread_create'
 collect2: error: ld returned 1 exit status
 configure:5743: $? = 1
@@ -2626,11 +2626,11 @@ configure:7788: checking lex output file root
 configure:7802: result: lex.yy
 configure:7807: checking lex library
 configure:7821: gcc -std=gnu99 -o conftest -g -O2   conftest.c   >&5
-/tmp/cckvaXIp.o: In function `input':
+/tmp/ccgFS1h0.o: In function `input':
 /home/stuart/pcapknock/libpcap-1.9.0/lex.yy.c:1170: undefined reference to `yywrap'
-/tmp/cckvaXIp.o: In function `yylex':
+/tmp/ccgFS1h0.o: In function `yylex':
 /home/stuart/pcapknock/libpcap-1.9.0/lex.yy.c:869: undefined reference to `yywrap'
-/tmp/cckvaXIp.o: In function `main':
+/tmp/ccgFS1h0.o: In function `main':
 /home/stuart/pcapknock/libpcap-1.9.0/conftest.l:18: undefined reference to `yywrap'
 collect2: error: ld returned 1 exit status
 configure:7821: $? = 1
@@ -8090,11 +8090,11 @@ configure: failed program was:
 configure:7831: result: none needed
 configure:7837: checking whether yytext is a pointer
 configure:7854: gcc -std=gnu99 -o conftest -g -O2   conftest.c   >&5
-/tmp/ccHgd2s5.o: In function `input':
+/tmp/ccdazZfG.o: In function `input':
 /home/stuart/pcapknock/libpcap-1.9.0/lex.yy.c:1170: undefined reference to `yywrap'
-/tmp/ccHgd2s5.o: In function `yylex':
+/tmp/ccdazZfG.o: In function `yylex':
 /home/stuart/pcapknock/libpcap-1.9.0/lex.yy.c:869: undefined reference to `yywrap'
-/tmp/ccHgd2s5.o: In function `main':
+/tmp/ccdazZfG.o: In function `main':
 /home/stuart/pcapknock/libpcap-1.9.0/conftest.l:18: undefined reference to `yywrap'
 collect2: error: ld returned 1 exit status
 configure:7854: $? = 1
