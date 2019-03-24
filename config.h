@@ -23,6 +23,8 @@
 
 /* If DAEMON is defined and pcapknock is run as a standalone process, it
  * causes the process to be run detached from the terminal. */
-//#define DAEMON
+/*
+#define DAEMON
+*/
 
 #endif /* #ifndef HAVE_CONFIG_H */
