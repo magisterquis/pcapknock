@@ -3,7 +3,7 @@
  * Configuration for pcapknock
  * By J. Stuart McMurray
  * Created 20190321
- * Last Modified 20190321
+ * Last Modified 20190323
  */
 
 #ifndef HAVE_CONFIG_H
