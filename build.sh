@@ -37,7 +37,7 @@ if [ "Linux" = "$(uname -s)" ]; then
         # Build an injector
         (cd $OUTDIR; xxd -i pcapknock.so) > linux-injector/pcapknock.so.c
         cc -DDEBUG $COPTS -I$INJDIR -o $OUTDIR/pcapknock.pid1-injector $INJDIR/*.c -static
-elif [ "OpenBSD" = "$(uname -s)" ]; then
+elif [ "OpenBSD" = "$(uname -s)" ] || [ "FreeBSD" = "$(uname -s)" ]; then
 	# Build a standalone binary for debugging
 	cc $COPTS -DDEBUG       -o "$OUTDIR/pcapknock.standalone.debug"  *.c -lpcap -lpthread
 	# Build a standalone non-daemonizing binary
