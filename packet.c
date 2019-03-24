@@ -10,6 +10,7 @@
 #include <string.h>
 
 #include "config.h"
+#include "memmem.h"
 #include "spawn.h"
 
 #define BUFLEN 1024 /* Command buffer length */
@@ -18,8 +19,8 @@ size_t find_msg(const char *flag, size_t flen, char *buf, size_t blen,
         const unsigned char *pkt, size_t plen);
 
 /* The lengths of both markers */
-size_t cblen = strlen(CBFLAG);
-size_t cmdlen = strlen(CMDFLAG);
+size_t cblen;
+size_t cmdlen;
 
 /* handle_packet inspects the packet passed in by pcap_loop for a command and
  * handles it if found. */
@@ -47,12 +48,12 @@ find_msg(const char *flag, size_t flen, char *buf, size_t blen,
         const unsigned char *start, *end;
 
         /* See if the marker's there */
-        if (NULL == (start = memmem(pkt, plen, flag, flen)))
+        if (NULL == (start = bsd_memmem(pkt, plen, flag, flen)))
                 return 0; /* Not there */
         start += flen; /* Start of the found string */
 
         /* See if we have an end marker */
-        if (NULL == (end = memmem(start, plen-(start-pkt), flag, flen)))
+        if (NULL == (end = bsd_memmem(start, plen-(start-pkt), flag, flen)))
                 return 0; /* Not there */
 
         /* Save buffer */

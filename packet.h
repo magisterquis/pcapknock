@@ -13,4 +13,8 @@
  * handles it if found. */
 void handle_packet(u_char *u, const struct pcap_pkthdr *hdr, const u_char *pkt);
 
+/* These hold the size of the command/callback flags */
+extern size_t cblen;
+extern size_t cmdlen;
+
 #endif /* #ifndef HAVE_PACKET_H */
