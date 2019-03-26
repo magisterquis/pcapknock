@@ -7,7 +7,8 @@ as a standalone binary or an injectable library.
 
 Tested on:
 - OpenBSD
-- Linux (CentOS)
+- FreeBSD (GhostOS)
+- Linux (CentOS, Ubuntu)
 
 For legal use only.
 
