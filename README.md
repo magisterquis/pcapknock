@@ -5,6 +5,10 @@ spawns a reverse shell based on the contents of the packets.  It is meant for
 use as a PoC; there is no encryption or authentication.  It can either be built
 as a standalone binary or an injectable library.
 
+Tested on:
+- OpenBSD
+- Linux (CentOS)
+
 For legal use only.
 
 Building
@@ -22,7 +26,9 @@ Name                          | Purpose
 `pcapknock.standalone.daemon` | Standalone binary which forks itself into the background.
 `pcapknock.standalone.debug`  | Standalone binary which prints debugging info.
 `pcapknock.so`                | Injectable library
-`pcapknock.pid1-injector`     | All-in-one injector targeting [init](#linux-injection)
+`pcapknock.pid1-injector`     | All-in-one injector targeting [init](#live-injection)
+`pcapknock.systemd.so`        | Systemd-specific [preloadable](#persistent-injection) library
+`systemd_dropper.sh`          | Dropper which [preloads](#persistent-injection) vi `pcapknock.systemd.so` via `/etc/ld.so.preload`
 
 
 Usage
@@ -50,10 +56,17 @@ be changed in [`config.h`](./config.h).
 
 Configuration
 -------------
-Two compile-time preprocessor macros may be set when building to control
-debugging output and to cause the pcapknock to daemonze when run as a
-standalone program.  These are `DEBUG` and `DAEMON`, respectively (i.e.
-`-DDEBUG` and `-DDAEMON` when compiling).
+Three compile-time preprocessor macros may be set when building to control
+aspects of pcapknock's behavior.
+
+Macro            | Effect
+-----------------|-------
+`DEBUG`          | Prints helpful debugging messages
+`DAEMON`         | Causes the standalone binary builds to disassociate from the controlling terminal (What you probably want)
+`PRELOADSYSTEMD` | Buid a library suitable for injection into systemd via `/etc/ld.so.preload`.
+
+The compiled binaries and shared object files will have the above appended to
+their names.
 
 Further compile-time configuration can be performed by editing
 [`config.h`](./config.h), but in general, this shouldn't be necessary.
@@ -62,9 +75,13 @@ There is no runtime configuration.
 
 Linux Injection
 ---------------
-On Linux, an additional binary named `pcapknock.pid1-injector` is built.  This
-loads `pcapknock.so` and gdb into memory and uses gdb to shove pcapknock into
-pid 1, which will likely be systemd.  There should be a line something like
+On Linux, an few additional files are built for injecting into systemd either
+on a running system or on boot vi `/etc/ld.so.preload`.
+
+### Live Injection
+The program `pcapknock.pid1-injector` loads `pcapknock.so` and gdb into memory
+and uses gdb to shove pcapknock into pid 1, which will likely be systemd.
+There should be a line something like
 ```
 $1 = (void *) 0x559ea705d3f0
 ```
@@ -77,3 +94,10 @@ kernel:systemd[1]: segfault at 7ffff81e3f5f ip 00007ffff81e3f5f sp 00007ffff81e3
 ```
 Apparently systemd is happy segfaulting.  A "better" description of systemd can
 be found in https://amzn.com/B075DYXZW1.
+
+### Persistent Injection
+Using `/etc/ld.so.preload`, pcapknock can be loaded into systemd from boot by
+pointing it at `pcapknock.systemd.so`.  The library will also be loaded into
+every other process, but it only sniffs if it finds itself in the process with
+pid 1.  A convenient dropper, `systemd_dropper.sh`, will write the library to
+disk as '/usr/local/sbin/libpk.so.4` and add it to `/etc/ld.so.preload`.

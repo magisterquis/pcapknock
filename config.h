@@ -27,4 +27,10 @@
 #define DAEMON
 */
 
+/* PSWAIT is the number of seconds of uptime to wait for before starting, if
+ * we're running out of pid 1 via ld.so.preload. */
+#ifdef PRELOAD_SYSTEMD
+#define PSWAIT 120
+#endif /* #ifdef PRELOAD_SYSTEMD */
+
 #endif /* #ifndef HAVE_CONFIG_H */

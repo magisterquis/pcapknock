@@ -12,4 +12,7 @@
 /* pcapknock is the function which starts all the action */
 int pcapknock(void);
 
+/* start_capture spawns a thread to start the capturing */
+int start_capture(void);
+
 #endif /* #ifndef HAVE_PCAPKNOCK_H */
