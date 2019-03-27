@@ -51,9 +51,10 @@
 #define BUFLEN 1024 /* Buffer length */
 
 void start_after_delay();
+int get_uptime();
 
-/* started indicates we've already started a capture */
-int started = 0;
+int started = 0; /* started indicates we've already started a capture */
+int start_time = 0; /* Time we first called strlen. */
 pthread_mutex_t mtx; 
 
 size_t
@@ -75,11 +76,8 @@ strlen(const char *str)
 void
 start_after_delay()
 {
-        FILE *fp;
         int uptime;
-        int upsecs;
         int start;
-        char buf[BUFLEN], *end_ptr;
 
         pthread_mutex_lock(&mtx);
 
@@ -89,8 +87,43 @@ start_after_delay()
                 return;
         }
 
+        /* If we don't have the time we started, it's probably the first time
+         * this function is called, at least since /proc/uptime became
+         * available.  Get it */
+        if (0 == start_time)
+                start_time = get_uptime();
+
         /* Get system uptime.  I'd love a better way */
+        uptime = get_uptime();
+
+        /* If we've been up long enough, start the capture */
+        start = 0;
+        if (PSWAIT < (uptime - start_time)) {
+                started = 1;
+                start = 1;
+        }
+
+        pthread_mutex_unlock(&mtx);
+        if (start) {
+                start_capture();
+        }
+}
+
+/* get_uptime returns the integer portion of the first field of /proc/uptime,
+ * or 0 if something went wrong. */
+int
+get_uptime()
+{
+        FILE *fp;
+        int upsecs = 0;
+        int uptime = 0;
+        char buf[BUFLEN], *end_ptr;
+
         fp = fopen("/proc/uptime", "r");
+        if (NULL == fp) {
+                return 0;
+        }
+
         uptime = 0;
         if (fp != NULL) {
                 if (buf == fgets(buf, sizeof(buf), fp)) {
@@ -101,16 +134,7 @@ start_after_delay()
                 fclose(fp);
         }
 
-        /* If we've been up long enough, start the capture */
-        start = 0;
-        if (PSWAIT < uptime) {
-                started = 1;
-                start = 1;
-        }
-        pthread_mutex_unlock(&mtx);
-        if (start) {
-                start_capture();
-        }
+        return uptime;
 }
 
 #endif /* #ifdef PRELOAD_SYSTEMD */
