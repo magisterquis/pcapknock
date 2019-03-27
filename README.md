@@ -9,6 +9,7 @@ Tested on:
 - OpenBSD
 - FreeBSD (GhostOS)
 - Linux (CentOS, Ubuntu)
+- LXC on Centos (Debian)
 
 For legal use only.
 
@@ -27,7 +28,7 @@ Name                          | Purpose
 `pcapknock.standalone.daemon` | Standalone binary which forks itself into the background.
 `pcapknock.standalone.debug`  | Standalone binary which prints debugging info.
 `pcapknock.so`                | Injectable library
-`pcapknock.pid1-injector`     | All-in-one injector targeting [init](#live-injection)
+`pcapknock.injector`          | Injects pcapknocks.so into a process with in-memory GDB
 `pcapknock.systemd.so`        | Systemd-specific [preloadable](#persistent-injection) library
 `systemd_dropper.sh`          | Dropper which [preloads](#persistent-injection) vi `pcapknock.systemd.so` via `/etc/ld.so.preload`
 
@@ -80,16 +81,26 @@ On Linux, an few additional files are built for injecting into systemd either
 on a running system or on boot vi `/etc/ld.so.preload`.
 
 ### Live Injection
-The program `pcapknock.pid1-injector` loads `pcapknock.so` and gdb into memory
-and uses gdb to shove pcapknock into pid 1, which will likely be systemd.
-There should be a line something like
+The program `pcapknock.injector` loads `pcapknock.so` and gdb into memory and
+uses gdb to shove pcapknock into another process which may be specified as the
+first command-line argument, e.g. `./pcapknock.injector 23`.  Not specifying a
+number or specifying an invalid number (like `./pcapknock.injector kittes`)
+will inject into pid 1.  Turns out it works pretty well.
+
+The injectee process should be have `libdl` loaded into it as well as have
+permissions to sniff packets (e.g. open a raw socket).  Try a trigger before
+getting rid of the access used to run `pcapknock.injector`.
+`COMMANDtouch /tmpCOMMAND` works pretty well for testing.
+
+When injecting there should be a line something like
 ```
 $1 = (void *) 0x559ea705d3f0
 ```
 which indicates (likely) success.  If the number on the right is 0, something's
 gone wrong.
 
-In either case, expect a lot of mesages like
+If injecting into init (which is the default if no pid is given) expect a lot
+of lines in dmesg and to the console similar to the following:
 ```
 kernel:systemd[1]: segfault at 7ffff81e3f5f ip 00007ffff81e3f5f sp 00007ffff81e3f50 error 15 
 ```

