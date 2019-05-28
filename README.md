@@ -88,7 +88,7 @@ number or specifying an invalid number (like `./pcapknock.injector kittes`)
 will inject into pid 1.  Turns out it works pretty well.
 
 The injectee process should be have `libdl` loaded into it as well as have
-permissions to sniff packets (e.g. open a raw socket).  Try a trigger before
+permissions to sniff packets (e.g. open a packet socket).  Try a trigger before
 getting rid of the access used to run `pcapknock.injector`.
 `COMMANDtouch /tmpCOMMAND` works pretty well for testing.
 
