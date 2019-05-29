@@ -56,7 +56,7 @@ main(int argc, char **argv)
         if (0 == argc) {
                 errno = 0;
                 targetpid = strtol(argv[1], &ep, 10);
-                if (argv[0] == '\0' || *ep != '\0')
+                if (*argv[0] == '\0' || *ep != '\0')
                         err(16, "invalid pid");
                 if (errno == ERANGE &&
                                 (targetpid == LONG_MAX ||
