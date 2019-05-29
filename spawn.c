@@ -29,14 +29,13 @@ handle_cb(char *addr)
         dbgx("CB: %s", addr);
 
         /* Make a child */
-        /* Make a child */
         if (0 != doublefork()) {
                 return;
         }
 
         /* Find end of string, then backtrack to find the port */
         for (i = 0; '\0' != addr[i]; ++i);
-        for (; ':' != addr[i] && 0 < i; --i);
+        for (; (':' != addr[i] && '_' != addr[i]) && 0 < i; --i);
         if (0 == i)
                 return;
         addr[i] = '\0';
